@@ -1,37 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Number Facts!</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
     <h1>Enter Data</h1>
     <form id="data-form">
-        <input type="text" id="user-input" placeholder="Enter your favourite number" required>
-        <button type="submit">Submit</button>
+      <input
+        type="text"
+        id="username"
+        placeholder="Enter your username"
+        required
+      />
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter your password"
+        required
+      />
+      <input
+        type="text"
+        id="user-input"
+        placeholder="Enter your favourite number"
+        required
+      />
+      <button type="submit">Submit</button>
     </form>
     <p id="message"></p>
     <a href="/entries">View Entries</a>
 
     <script>
-        document.getElementById("data-form").addEventListener("submit", function(event) {
-            event.preventDefault();
-            let input = document.getElementById("user-input").value;
+      document
+        .getElementById("data-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
 
-            fetch("/enter-data", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ input: input })
+          // Get the form data
+          let username = document.getElementById("username").value;
+          let password = document.getElementById("password").value;
+          let input = document.getElementById("user-input").value;
+
+          // Send the data to the server
+          fetch("/enter-data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              input: input,
+              username: username,
+              password: password,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Display success or error message
+              document.getElementById("message").innerText =
+                data.message || "Error submitting data";
+              document.getElementById("user-input").value = "";
             })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("message").innerText = data.message || "Error submitting data";
-                document.getElementById("user-input").value = "";
-            })
-            .catch(error => console.error("Error:", error));
+            .catch((error) => console.error("Error:", error));
         });
     </script>
-</body>
+  </body>
 </html>
