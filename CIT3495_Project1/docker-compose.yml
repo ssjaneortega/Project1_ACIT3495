@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: analytics_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db_mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongo_db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  authentication_service:
+    build: ./authentication_service
+    container_name: auth_service
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mysql
+
+  enter_data_service:
+    build: ./enter_data_service
+    container_name: enter_data
+    ports:
+      - "3001:3001"
+    depends_on:
+      - authentication_service
+      - mysql
+
+  show_results_service:
+    build: ./show_results_service
+    container_name: show_results
+    ports:
+      - "3002:3002"
+    depends_on:
+      - authentication_service
+      - mongodb
+
+  analytics_service:
+    build: ./analytics_service
+    container_name: analytics
+    depends_on:
+      - mysql
+      - mongodb
+
+volumes:
+  mysql_data:
+  mongo_data:
