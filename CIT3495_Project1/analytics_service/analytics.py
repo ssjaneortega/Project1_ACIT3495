@@ -47,32 +47,25 @@ def update_analytics():
     mysql_conn = get_mysql_connection()
     cursor = mysql_conn.cursor()
 
-    # Correct query to fetch data from "user_input" column in "entries" table
-    cursor.execute(
-        "SELECT MAX(user_input), MIN(user_input), AVG(user_input) FROM entries"
-    )
+    cursor.execute("SELECT MAX(user_input), MIN(user_input), AVG(user_input) FROM entries")
     result = cursor.fetchone()
 
-    print(f"DEBUG: Fetched from MySQL → {result}")  # Debugging output
-
-    if result:
+    if result and all(r is not None for r in result):  # Ensure no NULL values
         max_val, min_val, avg_val = result
+        stats_collection = mongo_db.get_collection('stats')
 
-        # Only update MongoDB if there is valid data
-        if max_val is not None and min_val is not None and avg_val is not None:
-            print(
-                f"DEBUG: Inserting into MongoDB → Max: {max_val}, Min: {min_val}, Avg: {avg_val}"
-            )
-            mongo_db.stats.update_one(
-                {},
-                {"$set": {"max": max_val, "min": min_val, "avg": avg_val}},
-                upsert=True,
-            )
-            print("Analytics updated in MongoDB")
-        else:
-            print("DEBUG: MySQL returned NULL values.")
+        # Convert Decimal to float for avg_val
+        avg_val = float(avg_val)
+
+        stats_collection.insert_one({
+            "max": max_val,
+            "min": min_val,
+            "avg": avg_val
+        })
+
+        print(f"Updated MongoDB: Max={max_val}, Min={min_val}, Avg={avg_val}")
     else:
-        print("No data found in MySQL.")
+        print("No valid data found in MySQL.")
 
     cursor.close()
     mysql_conn.close()

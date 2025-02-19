@@ -53,6 +53,7 @@
             .then((response) => response.json())
             .then((data) => {
               if (data.success) {
+                // After successful authentication, update analytics
                 fetchAnalytics();
               } else {
                 document.getElementById("error-message").innerText =
@@ -63,20 +64,25 @@
         });
 
       function fetchAnalytics() {
-        fetch("/api/analytics")
+        fetch("/api/analytics")  // Ensure this matches your backend endpoint for fetching analytics data
           .then((response) => response.json())
           .then((data) => {
             if (data.error) {
               document.getElementById("error-message").innerText =
                 "No analytics data found.";
             } else {
-              document.getElementById("max-value").innerText = data.max;
-              document.getElementById("min-value").innerText = data.min;
-              document.getElementById("avg-value").innerText = data.avg;
+              console.log("Analytics data:", data);  // Log the data to check it's correct
+              document.getElementById("max-value").innerText = data.max || "N/A";
+              document.getElementById("min-value").innerText = data.min || "N/A";
+              document.getElementById("avg-value").innerText = data.avg || "N/A";
               document.getElementById("analytics-data").style.display = "block";
             }
           })
-          .catch((error) => console.error("Error fetching analytics:", error));
+          .catch((error) => {
+            console.error("Error fetching analytics:", error);
+            document.getElementById("error-message").innerText =
+              "Error fetching analytics data.";
+          });
       }
     </script>
   </body>
