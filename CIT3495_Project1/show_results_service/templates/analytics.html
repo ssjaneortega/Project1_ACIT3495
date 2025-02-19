@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics Data</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Analytics Data</h1>
+
+    <form id="auth-form">
+      <label for="username">Username:</label>
+      <input type="text" id="username" required />
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" required />
+
+      <button type="submit">View Analytics</button>
+    </form>
+
+    <div id="analytics-data" style="display: none">
+      <h2>Statistics</h2>
+      <ul>
+        <li><strong>Max:</strong> <span id="max-value"></span></li>
+        <li><strong>Min:</strong> <span id="min-value"></span></li>
+        <li><strong>Average:</strong> <span id="avg-value"></span></li>
+      </ul>
+    </div>
+
+    <p id="error-message" style="color: red"></p>
+
+    <a href="/">Go Back</a>
+
+    <script>
+      document
+        .getElementById("auth-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          let username = document.getElementById("username").value;
+          let password = document.getElementById("password").value;
+
+          // Authenticate user
+          fetch("/authenticate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: username, password: password }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                fetchAnalytics();
+              } else {
+                document.getElementById("error-message").innerText =
+                  "Invalid credentials.";
+              }
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+
+      function fetchAnalytics() {
+        fetch("/api/analytics")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              document.getElementById("error-message").innerText =
+                "No analytics data found.";
+            } else {
+              document.getElementById("max-value").innerText = data.max;
+              document.getElementById("min-value").innerText = data.min;
+              document.getElementById("avg-value").innerText = data.avg;
+              document.getElementById("analytics-data").style.display = "block";
+            }
+          })
+          .catch((error) => console.error("Error fetching analytics:", error));
+      }
+    </script>
+  </body>
+</html>

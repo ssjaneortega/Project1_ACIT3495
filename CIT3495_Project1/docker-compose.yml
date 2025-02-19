@@ -13,6 +13,21 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db_mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "user",
+          "-p$password",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mongodb:
     image: mongo:latest
@@ -35,7 +50,8 @@ services:
     ports:
       - "5001:5001"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
   enter_data_service:
     build: ./enter_data_service
@@ -47,11 +63,14 @@ services:
       DB_USER: user
       DB_PASSWORD: password
       DB_NAME: data_collection
+      ANALYTICS_SERVICE_URL: http://analytics:5003
     ports:
       - "3001:3001"
     depends_on:
-      - authentication_service
-      - mysql
+      authentication_service:
+        condition: service_started
+      mysql:
+        condition: service_healthy
 
   show_results_service:
     build: ./show_results_service
@@ -63,8 +82,10 @@ services:
     ports:
       - "3002:3002"
     depends_on:
-      - authentication_service
-      - mongodb
+      authentication_service:
+        condition: service_started
+      mongodb:
+        condition: service_started
 
   analytics_service:
     build: ./analytics_service
@@ -76,9 +97,13 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: data_collection
       MONGO_URI: mongodb://mongo_db:27017/analytics
+    ports:
+      - "5003:5003"
     depends_on:
-      - mysql
-      - mongodb
+      mysql:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
 
 volumes:
   mysql_data:
