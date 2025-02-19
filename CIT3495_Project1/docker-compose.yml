@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: analytics_db
+      MYSQL_DATABASE: data_collection
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
