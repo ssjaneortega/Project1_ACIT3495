@@ -2,7 +2,9 @@ import pymysql
 import pymongo
 import cryptography
 
-mysql_conn = pymysql.connect(host="mysql_db", user="user", password="password", database="analytics_db")
+mysql_conn = pymysql.connect(
+    host="mysql_db", user="user", password="password", database="data_collection"
+)
 mongo_client = pymongo.MongoClient("mongodb://mongo_db:27017/")
 mongo_db = mongo_client["analytics"]
 
