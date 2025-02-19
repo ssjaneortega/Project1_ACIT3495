@@ -28,10 +28,10 @@ services:
     container_name: auth_service
     restart: always
     environment:
-      DB_HOST: mysql
+      DB_HOST: mysql_db
       DB_USER: user
       DB_PASSWORD: password
-      DB_NAME: analytics_db
+      DB_NAME: data_collection
     ports:
       - "5001:5001"
     depends_on:
@@ -43,10 +43,10 @@ services:
     restart: always
     environment:
       AUTH_SERVICE_URL: http://auth_service:5001
-      DB_HOST: mysql
+      DB_HOST: mysql_db
       DB_USER: user
       DB_PASSWORD: password
-      DB_NAME: analytics_db
+      DB_NAME: data_collection
     ports:
       - "3001:3001"
     depends_on:
@@ -71,10 +71,10 @@ services:
     container_name: analytics
     restart: always
     environment:
-      MYSQL_HOST: mysql
+      MYSQL_HOST: mysql_db
       MYSQL_USER: user
       MYSQL_PASSWORD: password
-      MYSQL_DATABASE: analytics_db
+      MYSQL_DATABASE: data_collection
       MONGO_URI: mongodb://mongo_db:27017/analytics
     depends_on:
       - mysql
